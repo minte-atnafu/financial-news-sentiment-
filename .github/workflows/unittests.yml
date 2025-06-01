@@ -1,43 +1,45 @@
 name: Unit Tests
 
-# Trigger the workflow on push or pull request to specified branches
 on:
   push:
-    branches:
-      - main
-      - task-1
-      - task-2
-      - task-3
+    branches: [main, task-1, task-2, task-3]
   pull_request:
-    branches:
-      - main
-      - task-1
-      - task-2
-      - task-3
+    branches: [main, task-1, task-2, task-3]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'  # Choose a version compatible with TA-Lib, PyNance, etc.
+          python-version: '3.9'
 
-      # Step 3: Install dependencies from requirements.txt
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest  # Ensure pytest is installed for testing
+          pip install pytest
 
-      # Step 4: Run unit tests
+      - name: Ensure tests folder exists
+        run: |
+          if [ ! -d "tests" ]; then
+            echo "❌ 'tests' folder not found!"
+            exit 1
+          fi
+
       - name: Run tests
         run: |
           pytest tests/ --verbose

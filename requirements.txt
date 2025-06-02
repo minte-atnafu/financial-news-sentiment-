@@ -10,3 +10,4 @@ jupyter
 pynance
 yfinance
 pytest
+Pillow>=10.0.0
